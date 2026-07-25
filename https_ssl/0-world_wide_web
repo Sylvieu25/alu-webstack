@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Displays the DNS record type and destination for given subdomains of a domain
+
+get_info() {
+	domain="$1"
+	subdomain="$2"
+	record=$(dig "$subdomain.$domain" | awk '/^;; ANSWER SECTION:/{getline; print $4, $5}')
+	type=$(echo $record | awk '{print $1}')
+	destination=$(echo $record | awk '{print $2}')
+	echo "The subdomain $subdomain is a $type record and points to $destination"
+}
+
+domain=$1
+subdomain=$2
+
+if [ -z "$subdomain" ]; then
+	for sub in www lb-01 web-01 web-02; do
+		get_info "$domain" "$sub"
+	done
+else
+	get_info "$domain" "$subdomain"
+fi
